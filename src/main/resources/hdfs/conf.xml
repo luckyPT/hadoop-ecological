@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <!--core-site.xml-->
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://10.38.161.138:9000</value>
+    </property>
+    <!--hdfs-site.xml-->
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
