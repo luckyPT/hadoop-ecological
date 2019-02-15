@@ -20,6 +20,8 @@ object OperateDataSet {
 
     //case class的定义在main函数外面，否则会报异常
     case class Person(name: String, age: Int, isMan: Boolean)
+    //JAVA 对象转DS，需要自己定义Encoder
+    case class LineWithId(text: String, id: Int)
 
     def main(args: Array[String]): Unit = {
         val spark = SparkSession.builder()
@@ -48,9 +50,6 @@ object OperateDataSet {
                 }
         }
         println(maxCount)
-
-        //JAVA 对象转DS，需要自己定义Encoder
-        case class LineWithId(text: String, id: Int)
 
         implicit val lineWithIdEncoder: Encoder[LineWithId] = org.apache.spark.sql.Encoders.kryo[LineWithId]
         ds.map {

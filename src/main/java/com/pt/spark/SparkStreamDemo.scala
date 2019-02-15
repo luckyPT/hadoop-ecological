@@ -17,9 +17,10 @@ object SparkStreamDemo {
                 .master("local[*]")
                 .getOrCreate()
         spark.sparkContext.setLogLevel("ERROR")
-        val ssc = new StreamingContext(spark.sparkContext, Seconds(5))
+        val ssc = new StreamingContext(spark.sparkContext, Seconds(2))
         //fileStream(ssc)
-        socketStream(ssc)
+        //socketStream(ssc)
+        socketStreamWindow(ssc)
 
     }
 
@@ -50,5 +51,23 @@ object SparkStreamDemo {
         wordCounts.print()
         ssc.start() // Start the computation
         ssc.awaitTermination() // Wait for the computation to terminate
+    }
+
+    /**
+      * DEMO:每隔6秒钟统计最近30秒的数据，每隔1分钟存储一次
+      * 应用场景：每天更新用户最近30天的行为数据
+      *
+      * @param ssc StreamingContext
+      */
+    def socketStreamWindow(ssc: StreamingContext): Unit = {
+        val lines = ssc.socketTextStream("localhost", 9999)
+        val statistics = lines.flatMap(_.split(" "))
+                .map(w => (w, 1))
+                .reduceByKeyAndWindow((a: Int, b: Int) => a + b, Seconds(30), Seconds(6))
+        statistics.print()
+        statistics.window(Minutes(1), Minutes(1))
+                .repartition(1).saveAsTextFiles("/home/panteng/IdeaProjects/hadoop-ecological/output/time")
+        ssc.start()
+        ssc.awaitTermination()
     }
 }
